@@ -5,6 +5,8 @@ import math
 
 import yaml
 
+from .output_layout import relative_path, validate_layout
+
 
 def load_config(path):
     path = Path(path).resolve(strict=True)
@@ -139,4 +141,7 @@ def load_config(path):
         if not isinstance(value, str) or not value.strip():
             raise ValueError(f"{section}.{key} must be a nonempty path")
         config[section][key] = str((path.parent / value).resolve())
+    validate_layout(config)
+    if "existing_run" in config["output"]:
+        relative_path(config["output"]["existing_run"])
     return config

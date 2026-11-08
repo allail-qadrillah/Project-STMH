@@ -1,2 +1,0 @@
-seed,status,active_pm_count,mean_active_pm_utilization_ratio,maximum_pm_utilization_ratio,maximum_pm_load_vcpu,overload_events,overload_percentage_pm_time_pairs,maximum_overload_utilization_ratio,total_overload_utilization_ratio,normalized_cpu_violation,migration_count,normalized_migration_cost,fitness,runtime_seconds,window,sample_start,sample_end
-42,FEASIBLE,12,0.553042534722222,0.7524999999999996,12.039999999999994,0,0.0,0.0,0.0,0.0,463,0.4482090997095837,1.545118733509235,1.816856810997706,4,37,48

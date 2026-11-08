@@ -22,6 +22,6 @@ test_uniform_crossover_complementarity_trial_and_copies (test_ga.GATests.test_un
 test_warm_population_one_inherited_plus_49_independent_draws (test_ga.GATests.test_warm_population_one_inherited_plus_49_independent_draws) ... ok
 
 ----------------------------------------------------------------------
-Ran 22 tests in 62.787s
+Ran 22 tests in 62.730s
 
 OK

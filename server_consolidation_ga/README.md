@@ -77,38 +77,56 @@ matrix and stable VM IDs are used by every method.
 
 ## Outputs
 
-Within `outputs/seed_42/`:
+`main.py --config configs/experiment_config.yaml` writes one run into
+`<output.directory>/seed_42/` using this layout (also created directly by the
+pipeline for fresh runs):
 
-- `data/`: processed matrix, VM order, exact filenames/SHA-256 manifest, observed
-  workload summary, validation/exclusion log.
-- `static/{baseline,ga}/`: `placement.csv`, `metrics.csv`, `raw.npz`.
-  GA adds `fitness_history.csv`. Combined table: `static/per_seed_metrics.csv`.
-- `dynamic/initial_placement.csv`: shared migration reference.
-- `dynamic/{cold_start,warm_start}/window_01/` through `window_24/`: same GA
-  artifacts, plus migration reference and one-based sample ranges.
-- `dynamic/{cold_start,warm_start}_per_window.csv`: window comparison tables.
-- `raw.npz`: placement, PM loads (vCPU), utilization ratios; GA also includes full
-  initial population and best-so-far chromosomes for all 101 generations.
-  Chromosome columns map to `data/vm_order.csv`; PM column index 0 means PM ID 1.
-- `fitness_history.csv`: generation, population size/fitness, feasible count,
-  best-so-far fitness and complete metrics, including status and violation.
-- `plots/`: workload, convergence, utilization heatmaps/distribution, static/dynamic
-  comparisons, runtime totals and per-window runtime.
-- `summaries/experiment_config.json`: resolved settings, dimensions, seed, provenance,
-  Python/NumPy/PyYAML/Matplotlib versions, source/test hashes, gate result.
-- `summaries/random_streams.json`: role, window, seed, spawn key, pool size,
-  initial/final PCG64 state for all 51 streams.
-- `summaries/acceptance_tests.txt`: actual pre-run test report.
-- `summaries/experiment_summary.csv`, `run_status.csv`: actual single-run results,
-  explicit infeasible statuses, daily migration/runtimes and window aggregates.
-- `summaries/execution_status.json`: RUNNING, COMPLETED, or FAILED, separate from
-  placement feasibility. COMPLETED never implies every placement is feasible.
+- `data/`: processed matrix, VM order, file manifest, workload summary,
+  validation/exclusion log.
+- `experiments/static/{baseline,ga}/`: `placement.csv`, `metrics.csv`,
+  `raw.npz`; GA adds `fitness_history.csv`. `static/baseline_placements.csv`,
+  `ga_placements.csv`, `fitness_history.csv` are the requested combined views.
+- `experiments/dynamic/initial_placement.csv`: shared migration reference.
+- `experiments/dynamic/{cold_start,warm_start}/`: `window_01/`–`window_24/` GA
+  artifacts, `per_window_metrics.csv`, plus combined `placements.csv` and
+  `fitness_history.csv` keyed by seed and window.
+- `visualizations/{workload,utilization,convergence,comparison}/`: original
+  figures by analytical purpose; every category has its own README.
+- `visualizations/workload_timeseries/`, `visualizations/performance_comparison/`:
+  figures reconstructed from saved placements and metrics (PNG + SVG).
+- `summaries/`: resolved configuration, provenance, source/test hashes, RNG
+  stream records, acceptance report, `experiment_summary.csv`, `run_status.csv`,
+  `execution_status.json`.
+- `README.md` files throughout document axes, legends, and interpretation limits.
+
+Existing destinations are never overwritten. Change `output.directory` (and, for
+the organizer, `output.existing_run`) to rerun; relative paths resolve against
+the configuration file. Output folders and figure stems are configurable via
+`output.folders` and `output.figure_names` without code changes.
+
+## Reorganize saved outputs without rerunning
+
+```bash
+.venv/bin/python organize_outputs.py --config configs/experiment_config.yaml \
+  --check-reference-summary
+```
+
+Copies the finished run (`output.existing_run`) into the organized layout after
+verifying it: workload shape, 51 placements, PM ranges, per-window
+reconstruction, and every saved metric are recomputed and compared with the
+stored values first. Figures are rendered from saved placements/metrics only; no
+GA is executed. Writes `summaries/structure_validation.json` and a per-file
+`structure_migration_log.md` (source, destination, action, SHA-256 status).
+Originals remain byte-identical; conflicting destinations abort before copying.
 
 No claim of global optimality, power savings, real-time control, or prediction.
 No migration overhead, network constraint, power model, or extra objective.
 Theoretical basis: specification Section 21, course GA materials, Yang (2014), Ch. 5.
 
 Existing `outputs/validation/` records earlier data-only checks. Its null seed and
-old 30-run configuration describe that historical validation, not current experiments.
+old 30-run configuration describe that historical validation, not current
+experiments. `outputs/seed_42/` also retains its pre-reorganization flat layout
+(`static/`, `dynamic/`, `plots/`) as the untouched original of the organized copy
+at the outputs root.
 Separate 13-VM tests check capacity boundary: at most ten 1-vCPU VMs cannot
 overload 12.8-vCPU safe PM capacity.

@@ -9,6 +9,8 @@ import sys
 import numpy as np
 import yaml
 
+from .output_layout import output_path
+
 
 def write_csv(path, rows, fields):
     with Path(path).open("w", newline="", encoding="utf-8") as stream:
@@ -21,10 +23,10 @@ def save_validation(config, matrix, ids, manifest, actions, destination, experim
     destination = Path(destination)
     # Refuse existing destinations to preserve previous artifacts.
     destination.mkdir(parents=True, exist_ok=False)
-    data_dir = destination / "data"
-    summaries = destination / "summaries"
-    data_dir.mkdir()
-    summaries.mkdir()
+    data_dir = output_path(destination, config, "data")
+    summaries = output_path(destination, config, "summaries")
+    data_dir.mkdir(parents=True)
+    summaries.mkdir(parents=True)
     np.save(data_dir / "workload_matrix.npy", matrix, allow_pickle=False)
     write_csv(data_dir / "vm_order.csv", [{"column_index": i, "vm_id": vm} for i, vm in enumerate(ids)],
               ["column_index", "vm_id"])

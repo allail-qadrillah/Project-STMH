@@ -189,7 +189,8 @@ class GATests(unittest.TestCase):
             results = run_experiment(config, matrix, ids, manifest, actions, output)
             self.assertEqual(matrix.shape, (288, 5))
             static = results["static"]
-            all_results = [(output / "static" / "ga", static["ga"], matrix, static["baseline"]["placement"], "static")]
+            experiments = output / "experiments"
+            all_results = [(experiments / "static" / "ga", static["ga"], matrix, static["baseline"]["placement"], "static")]
             dynamic = results["dynamic"]
             for method in ("cold_start", "warm_start"):
                 self.assertEqual(len(dynamic[method]), 24)
@@ -202,10 +203,10 @@ class GATests(unittest.TestCase):
                     inherited = reference if method == "warm_start" and index > 0 else None
                     expected_initial = initialize_population(5, config, replay_rng, inherited)
                     np.testing.assert_equal(result["initial_population"], expected_initial)
-                    all_results.append((output / "dynamic" / method / f"window_{window:02d}", result,
+                    all_results.append((experiments / "dynamic" / method / f"window_{window:02d}", result,
                                         matrix[index * 12:window * 12], reference.copy(), "dynamic"))
                     reference = result["placement"]
-                with (output / "dynamic" / f"{method}_per_window.csv").open() as stream:
+                with (experiments / "dynamic" / method / "per_window_metrics.csv").open() as stream:
                     self.assertEqual(len(list(csv.DictReader(stream))), 24)
                 summary = dynamic_summary(method, dynamic[method], 5, 42)
                 self.assertAlmostEqual(summary["migration_rate"], summary["migration_count"] / 120)
@@ -253,8 +254,8 @@ class GATests(unittest.TestCase):
             self.assertEqual(len(records), 51)
             self.assertEqual(len({tuple(r["spawn_key"]) for r in records}), 51)
             self.assertTrue(all("initial_state" in r and "final_state" in r for r in records))
-            self.assertGreaterEqual(len(list((output / "plots").glob("*.png"))), 12)
-            for image in (output / "plots").glob("*.png"):
+            self.assertGreaterEqual(len(list((output / "visualizations").rglob("*.png"))), 23)
+            for image in (output / "visualizations").rglob("*.png"):
                 self.assertGreater(image.stat().st_size, 1000)
             with (output / "summaries/experiment_summary.csv").open() as stream:
                 rows = list(csv.DictReader(stream))

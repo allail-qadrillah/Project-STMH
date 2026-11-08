@@ -5,10 +5,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+from .output_layout import figure_path, legacy_category
+
 
 def plot_experiment(destination, matrix, results, config):
-    directory = destination / "plots"
-    directory.mkdir(exist_ok=False)
     seed = config["project"]["master_seed"]
     threshold = config["infrastructure"]["safe_cpu_threshold"]
     capacity = config["infrastructure"]["pm_cpu_capacity_vcpu"]
@@ -16,7 +16,11 @@ def plot_experiment(destination, matrix, results, config):
     def save(fig, name):
         fig.suptitle(f"{fig._suptitle.get_text() if fig._suptitle else name} — single run, seed {seed}")
         fig.tight_layout()
-        fig.savefig(directory / f"{name}.png", dpi=150)
+        path = figure_path(destination, config, legacy_category(name), name)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if path.exists():
+            raise FileExistsError(path)
+        fig.savefig(path, dpi=150)
         plt.close(fig)
 
     def heatmap(loads, name):

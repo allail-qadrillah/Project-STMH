@@ -76,6 +76,14 @@ experiments:
     same_initial_placement: true
 output:
   directory: "../outputs"
+  existing_run: "seed_42"
+  folders:
+    data: "data"
+    experiments: "experiments"
+    visualizations: "visualizations"
+    summaries: "summaries"
+  # Optional keys: "category/logical_name": "custom_filename_stem".
+  figure_names: {}
   save_placements: true
   save_per_generation_history: true
   save_per_seed_metrics: true
