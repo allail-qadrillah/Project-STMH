@@ -1,0 +1,82 @@
+project:
+  name: "GA Server Consolidation"
+  random_seeds: 1
+  master_seed: 42
+  rng: "PCG64"
+  stream_ids:
+    static_baseline: 0
+    static_ga: 1
+    dynamic_initial: 2
+    cold_start: 3
+    warm_start: 4
+methodology:
+  warm_start_inherited_count: 1
+  warm_start_remaining: "independent_uniform_random"
+  tournament_replacement: true
+  tournament_ties: "random_participant"
+  elitism_ties: "random"
+  best_so_far_ties: "first_seen"
+  initial_placement: "migration_reference_only"
+  generation_count: "reproduction_updates"
+  infeasible_windows: "continue_with_selected"
+  migration_transitions: "include_initial"
+dataset:
+  path: "../../data/planetlab/20110420"
+  format: "planetlab_per_vm_files"
+  input_scale: "percentage"
+  expected_vm_count: 1033
+  expected_samples_per_vm: 288
+  sample_interval_minutes: 5
+  date_label: "20110420"
+  file_pattern: null
+  timestamp_column: null
+  vm_id_column: null
+  provenance:
+    repository: "https://github.com/beloglazov/planetlab-workload-traces"
+    download_url: "https://codeload.github.com/beloglazov/planetlab-workload-traces/zip/refs/heads/master"
+    commit_from_zip_comment: "344ffdbf7e528bfa6f276014e889e68a0cb640c2"
+    archive_sha256: "223c5dccd0102f25348cbe392f31f80f77483249ab874612ee0c04d4333db2b1"
+    workload_date: "20110420"
+    download_date: null
+    evidence: "Download URL in 2-EDA-PlanetLab Mikro.ipynb; commit in local ZIP comment; download date unknown."
+preprocessing:
+  missing_value_policy: "exclude_vm"
+  invalid_value_policy: "error"
+  stable_vm_order: true
+infrastructure:
+  vm_cpu_capacity_vcpu: 1.0
+  pm_cpu_capacity_vcpu: 16.0
+  available_pm_count: 12
+  safe_cpu_threshold: 0.80
+genetic_algorithm:
+  population_size: 50
+  max_generations: 100
+  tournament_size: 3
+  crossover:
+    type: "uniform"
+    probability: 0.80
+  mutation:
+    type: "random_reassignment"
+    per_gene_probability: 0.02
+  elitism_count: 2
+fitness:
+  server_weight: 0.70
+  migration_weight: 0.30
+  feasibility_tolerance: 1.0e-9
+experiments:
+  static:
+    enabled: true
+    evaluate_all_samples: true
+    include_migration_in_objective: false
+  dynamic:
+    enabled: true
+    window_size_samples: 12
+    compare_cold_start: true
+    compare_warm_start: true
+    same_initial_placement: true
+output:
+  directory: "../outputs"
+  save_placements: true
+  save_per_generation_history: true
+  save_per_seed_metrics: true
+  save_plots: true

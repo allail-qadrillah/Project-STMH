@@ -1,0 +1,17 @@
+test_config_matches_specification (test_foundation.FoundationTests.test_config_matches_specification) ... ok
+test_config_rejects_missing_invalid_and_nonfinite (test_foundation.FoundationTests.test_config_rejects_missing_invalid_and_nonfinite) ... ok
+test_fitness_ordering (test_foundation.FoundationTests.test_fitness_ordering) ... ok
+test_five_vm_validation_pipeline_and_artifacts (test_foundation.FoundationTests.test_five_vm_validation_pipeline_and_artifacts) ... ok
+test_loader_exclusions_scale_and_order (test_foundation.FoundationTests.test_loader_exclusions_scale_and_order) ... ok
+test_loader_rejects_invalid_without_replacement (test_foundation.FoundationTests.test_loader_rejects_invalid_without_replacement) ... ok
+test_migration_objective_not_mutations (test_foundation.FoundationTests.test_migration_objective_not_mutations) ... ok
+test_mutation_changes_to_different_valid_pm (test_foundation.FoundationTests.test_mutation_changes_to_different_valid_pm) ... ok
+test_placement_encoding_and_loads (test_foundation.FoundationTests.test_placement_encoding_and_loads) ... ok
+test_safe_capacity_and_all_timestamps (test_foundation.FoundationTests.test_safe_capacity_and_all_timestamps) ... ok
+test_small_averaged_violation_does_not_override_hard_constraint (test_foundation.FoundationTests.test_small_averaged_violation_does_not_override_hard_constraint) ... ok
+test_vcpu_conversion_and_invalid_ratio (test_foundation.FoundationTests.test_vcpu_conversion_and_invalid_ratio) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.284s
+
+OK
