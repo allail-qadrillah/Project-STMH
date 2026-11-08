@@ -1,0 +1,5 @@
+method,seed,status,active_pm_count,mean_active_pm_utilization_ratio,maximum_pm_utilization_ratio,maximum_pm_load_vcpu,overload_events,overload_percentage_pm_time_pairs,maximum_overload_utilization_ratio,total_overload_utilization_ratio,normalized_cpu_violation,migration_count,normalized_migration_cost,fitness,runtime_seconds,feasible_windows,infeasible_windows,transitions,migration_rate,mean_migrations_per_window,mean_active_pm_count,minimum_active_pm_count,maximum_active_pm_count,mean_runtime_per_window_seconds
+static_baseline,42,FEASIBLE,24,0.2806068250868055,0.581875,9.31,0,0.0,0.0,0.0,0.0,0,0.0,1.5,0.002442299999529496,,,,,,,,,
+static_ga,42,FEASIBLE,24,0.2806068250868055,0.5812499999999996,9.299999999999994,0,0.0,0.0,0.0,0.0,987,0.9554695062923524,1.5,8.197649998000998,,,,,,,,,
+cold_start,42,FEASIBLE,,,,,0,,,,,19086,,,54.97487044999434,24,0,24,0.7698451113262342,795.25,24.0,24,24,2.2906196020830976
+warm_start,42,FEASIBLE,,,,,0,,,,,785,,,53.56850995100831,24,0,24,0.03166343981929655,32.708333333333336,24.0,24,24,2.2320212479586794
