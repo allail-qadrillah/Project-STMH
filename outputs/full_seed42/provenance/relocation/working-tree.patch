@@ -1,0 +1,224 @@
+diff --git a/server_consolidation_ga/configs/experiment_config.yaml b/server_consolidation_ga/configs/experiment_config.yaml
+index 09a2adb..4ce2d83 100644
+--- a/server_consolidation_ga/configs/experiment_config.yaml
++++ b/server_consolidation_ga/configs/experiment_config.yaml
+@@ -5,10 +5,10 @@ project:
+   rng: "PCG64"
+   stream_ids:
+     static_baseline: 0
+-    static_ga: 1
++    static_ga: 601
+     dynamic_initial: 2
+-    cold_start: 3
+-    warm_start: 4
++    cold_start: 603
++    warm_start: 604
+ methodology:
+   warm_start_inherited_count: 1
+   warm_start_remaining: "independent_uniform_random"
+@@ -75,7 +75,7 @@ experiments:
+     compare_warm_start: true
+     same_initial_placement: true
+ output:
+-  directory: "../outputs"
++  directory: "../outputs/branch_feasibility_preserving_relocation"
+   existing_run: "seed_42"
+   folders:
+     data: "data"
+diff --git a/server_consolidation_ga/src/experiment.py b/server_consolidation_ga/src/experiment.py
+index ab5ac85..60e60ce 100644
+--- a/server_consolidation_ga/src/experiment.py
++++ b/server_consolidation_ga/src/experiment.py
+@@ -29,6 +29,8 @@ def run_experiment(config, matrix, ids, manifest, actions, destination, gate=Non
+                *sorted((source_root / "src").glob("*.py")), *sorted((source_root / "tests").glob("*.py"))]
+     effective.update(stage="EXPERIMENT", random_seed_list=[config["project"]["master_seed"]],
+                      run_count_per_method=config["project"]["random_seeds"],
++                     variant={501: "active_pm_aware_initialization", 601: "feasibility_preserving_relocation",
++                              701: "consolidation_aware_mutation"}.get(config["project"]["stream_ids"]["static_ga"], "original"),
+                      rng="numpy.random.Generator(PCG64(SeedSequence(master_seed, spawn_key=(role_id, window))))",
+                      source_sha256={str(p.relative_to(source_root)): hashlib.sha256(p.read_bytes()).hexdigest()
+                                     for p in sources}, gate=gate)
+@@ -52,7 +54,8 @@ def run_experiment(config, matrix, ids, manifest, actions, destination, gate=Non
+                        **save_result(experiments / "static" / method, static[method], ids, config)}
+                 summary_rows.append(row)
+                 status_rows.append({k: row[k] for k in ("method", "seed", "status")})
+-            write_csv(experiments / "static" / "per_seed_metrics.csv", summary_rows, list(summary_rows[0]))
++            write_csv(experiments / "static" / "per_seed_metrics.csv", summary_rows,
++                      list(dict.fromkeys(key for row in summary_rows for key in row)))
+             if progress is not None:
+                 progress("static_ga", static["ga"])
+         if config["experiments"]["dynamic"]["enabled"]:
+diff --git a/server_consolidation_ga/src/genetic_algorithm.py b/server_consolidation_ga/src/genetic_algorithm.py
+index 59a0967..59c02a2 100644
+--- a/server_consolidation_ga/src/genetic_algorithm.py
++++ b/server_consolidation_ga/src/genetic_algorithm.py
+@@ -6,6 +6,7 @@ import numpy as np
+ 
+ from .crossover import uniform_crossover
+ from .evaluation import evaluate_placement
++from .feasible_relocation import relocate_feasibly
+ from .fitness import calculate_fitness
+ from .mutation import mutate
+ from .placement import validate_placement
+@@ -17,14 +18,17 @@ def initialize_population(vm_count, config, rng, inherited=None):
+     pm_count = config["infrastructure"]["available_pm_count"]
+     if vm_count < 1:
+         raise ValueError("Population requires at least one VM")
+-    if inherited is None:
+-        return rng.integers(1, pm_count + 1, size=(size, vm_count))
+-    inherited = validate_placement(inherited, vm_count, pm_count)
+-    # Exactly one inherited chromosome; remaining draws independent, never mutated copies.
+-    return np.vstack((inherited, rng.integers(1, pm_count + 1, size=(size - 1, vm_count))))
++    uniform_count = max(1, size // 5)
++    chromosomes = [] if inherited is None else [validate_placement(inherited, vm_count, pm_count).copy()]
++    for _ in range(size - uniform_count - len(chromosomes)):
++        subset_size = int(rng.integers(1, pm_count))
++        subset = rng.choice(pm_count, size=subset_size, replace=False) + 1
++        chromosomes.append(rng.choice(subset, size=vm_count))
++    chromosomes.extend(rng.integers(1, pm_count + 1, size=(uniform_count, vm_count)))
++    return np.asarray(chromosomes, dtype=int)
+ 
+ 
+-def reproduce(population, fitness, config, rng):
++def reproduce(population, fitness, config, rng, demand=None, reference=None, operator_counters=None):
+     ga = config["genetic_algorithm"]
+     pm_count = config["infrastructure"]["available_pm_count"]
+     children = [population[i].copy() for i in elite_indices(fitness, rng, ga["elitism_count"])]
+@@ -34,7 +38,11 @@ def reproduce(population, fitness, config, rng):
+         for child in offspring:
+             if len(children) == ga["population_size"]:
+                 break
+-            children.append(mutate(child, rng, pm_count, ga["mutation"]["per_gene_probability"]))
++            if demand is None:
++                children.append(mutate(child, rng, pm_count, ga["mutation"]["per_gene_probability"]))
++            else:
++                children.append(relocate_feasibly(child, demand, config, rng,
++                    ga["mutation"]["per_gene_probability"], reference, operator_counters))
+     return np.asarray(children)
+ 
+ 
+@@ -49,9 +57,14 @@ def run_ga(demand_vcpu, config, rng, mode, reference=None, inherited=None):
+     initial_population = population.copy()
+     best_fitness = -np.inf
+     history, chromosomes = [], []
++    operator_counters = {"attempts": 0, "accepted": 0, "rejected": 0,
++                         "reducing_active_pm": 0, "same_active_pm": 0,
++                         "feasibility_evaluations": 0, "runtime_seconds": 0.0}
+     for generation in range(config["genetic_algorithm"]["max_generations"] + 1):
+         metrics = [evaluate_placement(demand, p, config, reference)[0] for p in population]
+         fitness = np.array([calculate_fitness(m, config, mode) for m in metrics])
++        feasible_metrics = [m for m in metrics if m["status"] == "FEASIBLE"]
++        active_counts = [m["active_pm_count"] for m in metrics]
+         candidate = int(np.argmax(fitness))
+         if fitness[candidate] > best_fitness:
+             best_fitness = float(fitness[candidate])
+@@ -61,12 +74,24 @@ def run_ga(demand_vcpu, config, rng, mode, reference=None, inherited=None):
+                         "population_best_fitness": float(fitness.max()),
+                         "population_mean_fitness": float(fitness.mean()),
+                         "feasible_population_count": sum(m["status"] == "FEASIBLE" for m in metrics),
++                        "infeasible_population_count": sum(m["status"] != "FEASIBLE" for m in metrics),
++                        "best_feasible_active_pm_count": min((m["active_pm_count"] for m in feasible_metrics), default=None),
++                        "mean_feasible_active_pm_count": float(np.mean([m["active_pm_count"] for m in feasible_metrics])) if feasible_metrics else None,
++                        "population_active_pm_counts": ";".join(map(str, active_counts)),
++                        "unique_active_pm_count_values": len(set(active_counts)),
++                        "best_normalized_cpu_violation": min(m["normalized_cpu_violation"] for m in metrics),
+                         "best_fitness": best_fitness, **best_metrics})
+         chromosomes.append(best.copy())
+         if generation < config["genetic_algorithm"]["max_generations"]:
+-            population = reproduce(population, fitness, config, rng)
++            population = reproduce(population, fitness, config, rng, demand, reference, operator_counters)
+     selected_metrics, loads = evaluate_placement(demand, best, config, reference)
+     return {"placement": best, "metrics": {**selected_metrics, "fitness": best_fitness},
+             "loads_vcpu": loads, "history": history,
+             "best_chromosomes": np.asarray(chromosomes), "initial_population": initial_population,
++            "operator_metrics": operator_counters,
+             "runtime_seconds": perf_counter() - start}
++
++
++import sys
++from .diagnostics import observe
++run_ga = observe(run_ga, sys.modules[__name__])
+diff --git a/server_consolidation_ga/src/reporting.py b/server_consolidation_ga/src/reporting.py
+index 36db569..e387b41 100644
+--- a/server_consolidation_ga/src/reporting.py
++++ b/server_consolidation_ga/src/reporting.py
+@@ -77,15 +77,25 @@ def save_result(directory, result, ids, config):
+     for key in ("window", "sample_start", "sample_end"):
+         if key in result:
+             metrics[key] = result[key]
++    metrics.update({f"{key}_evaluations": value for key, value in result.get("evaluation_counts", {}).items()})
++    metrics.update({f"operator_{key}": value for key, value in result.get("operator_metrics", {}).items()})
++    metrics["initial_active_pm_distribution"] = json.dumps(result.get("initial_active_pm_distribution", {}), sort_keys=True)
+     write_csv(directory / "metrics.csv", [metrics], list(metrics))
++    if "initial_population_metrics" in result:
++        initial_rows = [{"chromosome_index": i, **m} for i, m in enumerate(result["initial_population_metrics"])]
++        write_csv(directory / "initial_population_metrics.csv", initial_rows, list(initial_rows[0]))
+     arrays = {"placement": result["placement"], "loads_vcpu": result["loads_vcpu"],
+               "utilization_ratio": result["loads_vcpu"] / config["infrastructure"]["pm_cpu_capacity_vcpu"]}
+     for key in ("initial_population", "best_chromosomes", "reference"):
+         if key in result:
+             arrays[key] = result[key]
++    arrays["evaluation_counts"] = np.asarray(list(result.get("evaluation_counts", {}).values()), dtype=float)
++    arrays["operator_metrics_json"] = np.asarray(json.dumps(result.get("operator_metrics", {}), sort_keys=True))
+     np.savez_compressed(directory / "raw.npz", **arrays)
+     if "history" in result:
+         write_csv(directory / "fitness_history.csv", result["history"], list(result["history"][0]))
++        from .diagnostics import save_diagnostics
++        save_diagnostics(directory, result, write_csv)
+     return metrics
+ 
+ 
+diff --git a/server_consolidation_ga/tests/test_foundation.py b/server_consolidation_ga/tests/test_foundation.py
+index 50ebfb9..a72666b 100644
+--- a/server_consolidation_ga/tests/test_foundation.py
++++ b/server_consolidation_ga/tests/test_foundation.py
+@@ -13,6 +13,7 @@ from src.config import load_config
+ from src.data_loader import load_workload
+ from src.evaluation import evaluate_placement
+ from src.fitness import calculate_fitness
++from src.feasible_relocation import relocate_feasibly
+ from src.mutation import mutate
+ from src.placement import pm_loads_vcpu, validate_placement
+ from src.reporting import save_validation
+@@ -144,6 +145,18 @@ class FoundationTests(unittest.TestCase):
+         np.testing.assert_equal(mutate(original, np.random.default_rng(42), 12, 0), original)
+         np.testing.assert_equal(original, np.tile(np.arange(1, 13), 100))
+ 
++    def test_feasible_relocation_rejects_overload_without_changing_source(self):
++        config = copy.deepcopy(self.config)
++        config["infrastructure"]["available_pm_count"] = 2
++        demand = np.ones((2, 24))
++        source = np.repeat([1, 2], 12)
++        counters = {}
++        result = relocate_feasibly(source, demand, config, np.random.default_rng(42), 1,
++                                   counters=counters)
++        self.assertEqual(counters["attempts"], 24)
++        self.assertEqual(counters["rejected"], 24)
++        np.testing.assert_equal(result, source)
++
+     def test_loader_exclusions_scale_and_order(self):
+         with tempfile.TemporaryDirectory() as tmp:
+             root = Path(tmp)
+diff --git a/server_consolidation_ga/tests/test_ga.py b/server_consolidation_ga/tests/test_ga.py
+index bcede6b..512dcea 100644
+--- a/server_consolidation_ga/tests/test_ga.py
++++ b/server_consolidation_ga/tests/test_ga.py
+@@ -96,12 +96,16 @@ class GATests(unittest.TestCase):
+         elite = elite_indices([3, 1, 3, 2], rng, 2)
+         self.assertEqual(set(elite), {0, 2})
+ 
+-    def test_warm_population_one_inherited_plus_49_independent_draws(self):
++    def test_warm_population_one_inherited_plus_39_compact_10_uniform(self):
+         inherited = np.full(7, 5, dtype=int)
+         rng, _ = make_stream(self.config, "warm_start", 2)
+         actual = initialize_population(7, self.config, rng, inherited)
+         replay, _ = make_stream(self.config, "warm_start", 2)
+-        expected_random = replay.integers(1, 13, size=(49, 7))
++        expected_random = []
++        for _ in range(39):
++            labels = replay.choice(12, size=int(replay.integers(1, 12)), replace=False) + 1
++            expected_random.append(replay.choice(labels, size=7))
++        expected_random.extend(replay.integers(1, 13, size=(10, 7)))
+         self.assertEqual(actual.shape, (50, 7))
+         np.testing.assert_equal(actual[0], inherited)
+         np.testing.assert_equal(actual[1:], expected_random)

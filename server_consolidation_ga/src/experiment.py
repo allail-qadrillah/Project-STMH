@@ -29,6 +29,8 @@ def run_experiment(config, matrix, ids, manifest, actions, destination, gate=Non
                *sorted((source_root / "src").glob("*.py")), *sorted((source_root / "tests").glob("*.py"))]
     effective.update(stage="EXPERIMENT", random_seed_list=[config["project"]["master_seed"]],
                      run_count_per_method=config["project"]["random_seeds"],
+                     variant={501: "active_pm_aware_initialization", 601: "feasibility_preserving_relocation",
+                              701: "consolidation_aware_mutation"}.get(config["project"]["stream_ids"]["static_ga"], "original"),
                      rng="numpy.random.Generator(PCG64(SeedSequence(master_seed, spawn_key=(role_id, window))))",
                      source_sha256={str(p.relative_to(source_root)): hashlib.sha256(p.read_bytes()).hexdigest()
                                     for p in sources}, gate=gate)
@@ -52,7 +54,8 @@ def run_experiment(config, matrix, ids, manifest, actions, destination, gate=Non
                        **save_result(experiments / "static" / method, static[method], ids, config)}
                 summary_rows.append(row)
                 status_rows.append({k: row[k] for k in ("method", "seed", "status")})
-            write_csv(experiments / "static" / "per_seed_metrics.csv", summary_rows, list(summary_rows[0]))
+            write_csv(experiments / "static" / "per_seed_metrics.csv", summary_rows,
+                      list(dict.fromkeys(key for row in summary_rows for key in row)))
             if progress is not None:
                 progress("static_ga", static["ga"])
         if config["experiments"]["dynamic"]["enabled"]:
