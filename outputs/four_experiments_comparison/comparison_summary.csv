@@ -1,0 +1,5 @@
+approach,source_branch,run_status,static_status,active_pm_count,pm_reduction_percent,overload_events,static_migrations,static_runtime_seconds,cold_windows_available,cold_feasible_windows,cold_migrations_available,warm_windows_available,warm_feasible_windows,warm_migrations_available
+Initial GA (Original Baseline),"main (original source, isolated replay)",COMPLETED,FEASIBLE,24,0.000000,0,987,8.430684533999738,24,24,19086,24,24,785
+Experiment 1: Active-PM-aware Initialization,experiment/active-pm-aware-initialization,COMPLETED,FEASIBLE,14,41.666667,0,990,5.574334124001325,24,24,23664,24,24,5942
+Experiment 2: Feasibility-preserving Relocation,experiment/feasibility-preserving-relocation,COMPLETED,FEASIBLE,15,37.500000,0,984,114.5121971919998,24,24,23573,24,24,2978
+Experiment 3: Consolidation-aware Mutation,experiment/consolidation-aware-mutation,RUNNING,FEASIBLE,11,54.166667,0,979,3852.7420789200005,4,4,3776,0,0,0
