@@ -1,0 +1,2 @@
+attempts,accepted,rejected,reducing_active_pm,same_active_pm,increasing_active_pm,successful,failed,pms_emptied,vms_moved,tentative_moves,discarded_moves,feasibility_evaluations,runtime_seconds
+0,0,0,0,0,0,0,0,0,0,0,0,0,0.0

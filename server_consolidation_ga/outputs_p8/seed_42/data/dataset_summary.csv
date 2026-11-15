@@ -1,2 +1,0 @@
-observed_samples,observed_vms,minimum_utilization_ratio,maximum_utilization_ratio,mean_utilization_ratio,mean_aggregate_demand_vcpu,maximum_aggregate_demand_vcpu,minimum_aggregate_demand_vcpu
-288,1033,0.0,0.99,0.10431076556953855,107.75302083333334,123.88000000000002,93.37

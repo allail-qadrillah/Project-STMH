@@ -1,7 +1,0 @@
-Data validation for experiment.
-Schema: one numeric sample per line, no header; sample-index alignment.
-Stable VM order: lexicographic filename order.
-Input scale: percentage; output scale: ratio.
-Scale taken from explicit configuration, not inferred from magnitude.
-Expected VM count: 1033; observed: 1033.
-Excluded traces: 0.
