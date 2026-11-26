@@ -38,11 +38,11 @@ Satu run eksperimen, master seed 42. Nilai yang dilaporkan:
 | Metode | Status | PM aktif | Migrasi | Overload |
 |---|---|---:|---:|---:|
 | static_baseline | FEASIBLE | 24 | 0 | 0 |
-| static_ga | FEASIBLE | 24 | 987 | 0 |
-| cold_start | FEASIBLE | 24.0 | 19086 | 0 |
-| warm_start | FEASIBLE | 24.0 | 785 | 0 |
+| static_ga | FEASIBLE | 14 | 990 | 0 |
+| cold_start | FEASIBLE | 12.75 | 23664 | 0 |
+| warm_start | FEASIBLE | 13.125 | 5942 | 0 |
 
-Reduksi migrasi dinamis, warm-start vs. cold-start: 95.9%.
+Reduksi migrasi dinamis, warm-start vs. cold-start: 74.9%.
 
 Keempat metode memakai 12 PM aktif; tidak ada pengurangan jumlah PM yang terbukti.
 

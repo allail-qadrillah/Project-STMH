@@ -4,11 +4,11 @@ project:
   master_seed: 42
   rng: "PCG64"
   stream_ids:
-    static_baseline: 0
-    static_ga: 1
+    static_baseline: 500
+    static_ga: 501
     dynamic_initial: 2
-    cold_start: 3
-    warm_start: 4
+    cold_start: 503
+    warm_start: 504
 methodology:
   warm_start_inherited_count: 1
   warm_start_remaining: "independent_uniform_random"
@@ -21,7 +21,7 @@ methodology:
   infeasible_windows: "continue_with_selected"
   migration_transitions: "include_initial"
 dataset:
-  path: "../../data/planetlab/20110420"
+  path: "/mnt/e/.TEMPORARY/Project STMH/data/planetlab/20110420"
   format: "planetlab_per_vm_files"
   input_scale: "percentage"
   expected_vm_count: 1033
@@ -75,7 +75,7 @@ experiments:
     compare_warm_start: true
     same_initial_placement: true
 output:
-  directory: "../outputs"
+  directory: "../outputs/branch_active_pm_initialization"
   existing_run: "seed_42"
   folders:
     data: "data"

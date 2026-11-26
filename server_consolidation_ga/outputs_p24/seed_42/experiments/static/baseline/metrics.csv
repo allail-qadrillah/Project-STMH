@@ -1,2 +1,2 @@
-seed,status,active_pm_count,mean_active_pm_utilization_ratio,maximum_pm_utilization_ratio,maximum_pm_load_vcpu,overload_events,overload_percentage_pm_time_pairs,maximum_overload_utilization_ratio,total_overload_utilization_ratio,normalized_cpu_violation,migration_count,normalized_migration_cost,fitness,runtime_seconds
-42,FEASIBLE,24,0.2806068250868055,0.581875,9.31,0,0.0,0.0,0.0,0.0,0,0.0,1.5,0.002442299999529496
+seed,status,active_pm_count,mean_active_pm_utilization_ratio,maximum_pm_utilization_ratio,maximum_pm_load_vcpu,overload_events,overload_percentage_pm_time_pairs,maximum_overload_utilization_ratio,total_overload_utilization_ratio,normalized_cpu_violation,migration_count,normalized_migration_cost,fitness,runtime_seconds,initial_active_pm_distribution
+42,FEASIBLE,24,0.2806068250868055,0.6531249999999998,10.449999999999998,0,0.0,0.0,0.0,0.0,0,0.0,1.5,0.002397683999788569,{}

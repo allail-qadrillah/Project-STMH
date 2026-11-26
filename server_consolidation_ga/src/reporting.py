@@ -77,15 +77,25 @@ def save_result(directory, result, ids, config):
     for key in ("window", "sample_start", "sample_end"):
         if key in result:
             metrics[key] = result[key]
+    metrics.update({f"{key}_evaluations": value for key, value in result.get("evaluation_counts", {}).items()})
+    metrics.update({f"operator_{key}": value for key, value in result.get("operator_metrics", {}).items()})
+    metrics["initial_active_pm_distribution"] = json.dumps(result.get("initial_active_pm_distribution", {}), sort_keys=True)
     write_csv(directory / "metrics.csv", [metrics], list(metrics))
+    if "initial_population_metrics" in result:
+        initial_rows = [{"chromosome_index": i, **m} for i, m in enumerate(result["initial_population_metrics"])]
+        write_csv(directory / "initial_population_metrics.csv", initial_rows, list(initial_rows[0]))
     arrays = {"placement": result["placement"], "loads_vcpu": result["loads_vcpu"],
               "utilization_ratio": result["loads_vcpu"] / config["infrastructure"]["pm_cpu_capacity_vcpu"]}
     for key in ("initial_population", "best_chromosomes", "reference"):
         if key in result:
             arrays[key] = result[key]
+    arrays["evaluation_counts"] = np.asarray(list(result.get("evaluation_counts", {}).values()), dtype=float)
+    arrays["operator_metrics_json"] = np.asarray(json.dumps(result.get("operator_metrics", {}), sort_keys=True))
     np.savez_compressed(directory / "raw.npz", **arrays)
     if "history" in result:
         write_csv(directory / "fitness_history.csv", result["history"], list(result["history"][0]))
+        from .diagnostics import save_diagnostics
+        save_diagnostics(directory, result, write_csv)
     return metrics
 
 

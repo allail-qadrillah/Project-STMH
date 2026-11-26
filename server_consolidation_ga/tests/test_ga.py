@@ -96,15 +96,16 @@ class GATests(unittest.TestCase):
         elite = elite_indices([3, 1, 3, 2], rng, 2)
         self.assertEqual(set(elite), {0, 2})
 
-    def test_warm_population_one_inherited_plus_49_independent_draws(self):
+    def test_warm_population_one_inherited_plus_39_compact_10_uniform(self):
         inherited = np.full(7, 5, dtype=int)
         rng, _ = make_stream(self.config, "warm_start", 2)
         actual = initialize_population(7, self.config, rng, inherited)
         replay, _ = make_stream(self.config, "warm_start", 2)
-        expected_random = replay.integers(1, 13, size=(49, 7))
+        expected = initialize_population(7, self.config, replay, inherited)
         self.assertEqual(actual.shape, (50, 7))
         np.testing.assert_equal(actual[0], inherited)
-        np.testing.assert_equal(actual[1:], expected_random)
+        np.testing.assert_equal(actual, expected)
+        self.assertTrue(all(len(np.unique(p)) < 12 for p in actual[1:40]))
         actual[0, 0] = 12
         np.testing.assert_equal(inherited, 5)
 

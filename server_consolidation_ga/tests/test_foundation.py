@@ -13,6 +13,7 @@ from src.config import load_config
 from src.data_loader import load_workload
 from src.evaluation import evaluate_placement
 from src.fitness import calculate_fitness
+from src.genetic_algorithm import initialize_population
 from src.mutation import mutate
 from src.placement import pm_loads_vcpu, validate_placement
 from src.reporting import save_validation
@@ -143,6 +144,19 @@ class FoundationTests(unittest.TestCase):
         self.assertTrue(np.all((mutated >= 1) & (mutated <= 12)))
         np.testing.assert_equal(mutate(original, np.random.default_rng(42), 12, 0), original)
         np.testing.assert_equal(original, np.tile(np.arange(1, 13), 100))
+
+    def test_active_pm_initialization_keeps_uniform_diversity_and_compact_candidates(self):
+        rng = np.random.Generator(np.random.PCG64(42))
+        population = initialize_population(40, self.config, rng)
+        self.assertEqual(population.shape, (50, 40))
+        self.assertTrue(np.all((population >= 1) & (population <= 12)))
+        active_counts = np.array([len(np.unique(chromosome)) for chromosome in population])
+        self.assertTrue(np.all(active_counts[:40] < 12))
+        self.assertEqual(len(population[-10:]), 10)
+        self.assertTrue(np.all((population[-10:] >= 1) & (population[-10:] <= 12)))
+        for chromosome in population:
+            self.assertEqual(len(chromosome), 40)
+            self.evaluate(np.full((2, 40), 0.01), chromosome)
 
     def test_loader_exclusions_scale_and_order(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,0 +1,14 @@
+ M server_consolidation_ga/configs/experiment_config.yaml
+ M server_consolidation_ga/src/experiment.py
+ M server_consolidation_ga/src/genetic_algorithm.py
+ M server_consolidation_ga/src/reporting.py
+ M server_consolidation_ga/tests/test_foundation.py
+ M server_consolidation_ga/tests/test_ga.py
+?? server_consolidation_ga/DIAGNOSTIC_SCHEMA.md
+?? server_consolidation_ga/configs/controlled_24.yaml
+?? server_consolidation_ga/evaluate_frozen.py
+?? server_consolidation_ga/src/diagnostics.py
+?? server_consolidation_ga/src/feasible_relocation.py
+?? server_consolidation_ga/tests/test_controlled_integration.py
+?? server_consolidation_ga/tests/test_initialization_policy.py
+?? server_consolidation_ga/tests/test_schema_contract.py

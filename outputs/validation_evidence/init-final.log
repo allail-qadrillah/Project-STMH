@@ -1,0 +1,32 @@
+test_24_pm_static_dynamic_and_artifacts (test_controlled_integration.ControlledIntegrationTests.test_24_pm_static_dynamic_and_artifacts) ... ok
+test_original_baseline_observer_rng_and_execution_equality (test_controlled_integration.ControlledIntegrationTests.test_original_baseline_observer_rng_and_execution_equality) ... ok
+test_active_pm_initialization_keeps_uniform_diversity_and_compact_candidates (test_foundation.FoundationTests.test_active_pm_initialization_keeps_uniform_diversity_and_compact_candidates) ... ok
+test_config_matches_specification (test_foundation.FoundationTests.test_config_matches_specification) ... ok
+test_config_rejects_missing_invalid_and_nonfinite (test_foundation.FoundationTests.test_config_rejects_missing_invalid_and_nonfinite) ... ok
+test_fitness_ordering (test_foundation.FoundationTests.test_fitness_ordering) ... ok
+test_five_vm_validation_pipeline_and_artifacts (test_foundation.FoundationTests.test_five_vm_validation_pipeline_and_artifacts) ... ok
+test_loader_exclusions_scale_and_order (test_foundation.FoundationTests.test_loader_exclusions_scale_and_order) ... ok
+test_loader_rejects_invalid_without_replacement (test_foundation.FoundationTests.test_loader_rejects_invalid_without_replacement) ... ok
+test_migration_objective_not_mutations (test_foundation.FoundationTests.test_migration_objective_not_mutations) ... ok
+test_mutation_changes_to_different_valid_pm (test_foundation.FoundationTests.test_mutation_changes_to_different_valid_pm) ... ok
+test_placement_encoding_and_loads (test_foundation.FoundationTests.test_placement_encoding_and_loads) ... ok
+test_safe_capacity_and_all_timestamps (test_foundation.FoundationTests.test_safe_capacity_and_all_timestamps) ... ok
+test_small_averaged_violation_does_not_override_hard_constraint (test_foundation.FoundationTests.test_small_averaged_violation_does_not_override_hard_constraint) ... ok
+test_vcpu_conversion_and_invalid_ratio (test_foundation.FoundationTests.test_vcpu_conversion_and_invalid_ratio) ... ok
+test_best_so_far_first_seen_and_101_evaluations (test_ga.GATests.test_best_so_far_first_seen_and_101_evaluations) ... ok
+test_complete_ga_replays_exactly (test_ga.GATests.test_complete_ga_replays_exactly) ... ok
+test_five_vm_full_pipeline_100_updates_24_windows_and_artifacts (test_ga.GATests.test_five_vm_full_pipeline_100_updates_24_windows_and_artifacts) ... ok
+test_infeasible_windows_continue_with_selected_minimum_violation (test_ga.GATests.test_infeasible_windows_continue_with_selected_minimum_violation) ... ok
+test_random_elitism_and_exact_population_size (test_ga.GATests.test_random_elitism_and_exact_population_size) ... ok
+test_reject_unapproved_seeds_streams_and_policies (test_ga.GATests.test_reject_unapproved_seeds_streams_and_policies) ... ok
+test_streams_reproducible_order_independent_and_distinct (test_ga.GATests.test_streams_reproducible_order_independent_and_distinct) ... ok
+test_tournament_replacement_and_random_equal_best_participant (test_ga.GATests.test_tournament_replacement_and_random_equal_best_participant) ... ok
+test_uniform_crossover_complementarity_trial_and_copies (test_ga.GATests.test_uniform_crossover_complementarity_trial_and_copies) ... ok
+test_warm_population_one_inherited_plus_39_compact_10_uniform (test_ga.GATests.test_warm_population_one_inherited_plus_39_compact_10_uniform) ... ok
+test_fixed_draws_inherited_retention_and_complete_window (test_initialization_policy.InitializationPolicyTests.test_fixed_draws_inherited_retention_and_complete_window) ... ok
+test_all_five_artifacts_24_pm (test_schema_contract.SchemaContractTests.test_all_five_artifacts_24_pm) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 86.600s
+
+OK
